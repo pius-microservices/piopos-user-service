@@ -1,0 +1,303 @@
+definitions:
+  models.AddRoleRequest:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  models.SendNewOTPRequest:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  models.SignUpRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  models.VerifyAccountRequest:
+    properties:
+      email:
+        type: string
+      otp_code:
+        type: string
+    required:
+    - email
+    - otp_code
+    type: object
+info:
+  contact: {}
+paths:
+  /api/role:
+    get:
+      consumes:
+      - application/json
+      description: Get all user roles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Get roles
+      tags:
+      - Roles
+    post:
+      consumes:
+      - application/json
+      description: Create new role
+      parameters:
+      - description: User data
+        in: body
+        name: userData
+        required: true
+        schema:
+          $ref: '#/definitions/models.AddRoleRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+        "409":
+          description: Conflict
+        "500":
+          description: Internal Server Error
+      summary: Add Role
+      tags:
+      - Roles
+  /api/user-service/role/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a role by role ID
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Delete a role
+      tags:
+      - Roles
+    get:
+      consumes:
+      - application/json
+      description: Get role by role ID
+      parameters:
+      - description: Role ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Get a role
+      tags:
+      - Roles
+  /api/user-service/user/:
+    get:
+      consumes:
+      - application/json
+      description: Fetch all users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Get all users
+      tags:
+      - Users
+  /api/user-service/user/{id}:
+    get:
+      consumes:
+      - application/json
+      description: Fetch the user details based on the ID provided
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      summary: Get user by ID
+      tags:
+      - Users
+  /api/user-service/user/get-user-by-email:
+    get:
+      consumes:
+      - application/json
+      description: Get user data by email
+      parameters:
+      - description: User email
+        in: query
+        name: email
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      summary: Get user by email
+      tags:
+      - Users
+  /api/user-service/user/profile:
+    get:
+      consumes:
+      - application/json
+      description: Fetch the user profile based on the decoded ID from access token
+      parameters:
+      - description: Authorization token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      summary: Get user profile
+      tags:
+      - Users
+  /api/user-service/user/send-otp:
+    put:
+      consumes:
+      - application/json
+      description: Reusable OTP code sender
+      parameters:
+      - description: User data
+        in: body
+        name: userData
+        required: true
+        schema:
+          $ref: '#/definitions/models.SendNewOTPRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+        "404":
+          description: Not Found
+        "500":
+          description: Internal Server Error
+      summary: Send OTP code
+      tags:
+      - Users
+  /api/user-service/user/signup:
+    post:
+      consumes:
+      - application/json
+      description: Register a new user with name, email, and password
+      parameters:
+      - description: User data
+        in: body
+        name: userData
+        required: true
+        schema:
+          $ref: '#/definitions/models.SignUpRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+        "409":
+          description: Conflict
+        "500":
+          description: Internal Server Error
+      summary: Register a new user
+      tags:
+      - Users
+  /api/user-service/user/verify-account:
+    put:
+      consumes:
+      - application/json
+      description: Account verification after registering a new account
+      parameters:
+      - description: User data
+        in: body
+        name: userData
+        required: true
+        schema:
+          $ref: '#/definitions/models.VerifyAccountRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "500":
+          description: Internal Server Error
+      summary: Account verification
+      tags:
+      - Users
+swagger: "2.0"
