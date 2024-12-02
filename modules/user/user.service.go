@@ -94,6 +94,50 @@ func (service *userService) SendNewOTPCode(email string) (gin.H, int) {
 	return gin.H{"message": "New OTP code sent successfully"}, 200
 }
 
+func (service *userService) UpdateUserProfile(userData *models.User, id string) (gin.H, int) {
+	_, err := service.repo.GetUserById(id)
+
+	if err != nil {
+		if err.Error() == "record not found" {
+			return gin.H{"status": 404, "message": "User not found"}, 404
+		}
+
+		return gin.H{"status": 500, "message": err.Error()}, 500
+	}
+
+	updatedUser, err := service.repo.UpdateUserProfile(userData, id)
+
+	if err != nil {
+		return gin.H{"status": 500, "message": err.Error()}, 500
+	}
+
+	return gin.H{"status": 200, "message": "User updated successfully", "data": &updatedUser}, 200
+}
+
+func (service *userService) UpdatePassword(id string, password string) (gin.H, int) {
+	_, err := service.repo.GetUserById(id)
+
+	if err != nil {
+		if err.Error() == "record not found" {
+			return gin.H{"status": 404, "message": "User not found"}, 404
+		}
+		return gin.H{"status": 500, "message": err.Error()}, 500
+	}
+
+	hashedPassword, err := utils.HashPassword(password)
+	if err != nil {
+		return gin.H{"status": 500, "message": err.Error()}, 500
+	}
+
+	_, err = service.repo.UpdatePassword(id, hashedPassword)
+
+	if err != nil {
+		return gin.H{"status": 500, "message": err.Error()}, 500
+	}
+
+	return gin.H{"status": 200, "message": "Password updated successfully"}, 200
+}
+
 func (service *userService) GetUsers() (gin.H, int) {
 	users, err := service.repo.GetUsers()
 

@@ -25,6 +25,27 @@ func (repo *userRepo) SignUp(data *models.User) (*models.User, error) {
 
 }
 
+func (repo *userRepo) UpdateUserProfile(userData *models.User, id string) (*models.User, error) {
+	if err := repo.db.
+		Model(userData).
+		Where("id = ?", id).
+		Updates(userData).Error; err != nil {
+		return nil, err
+	}
+
+	return userData, nil
+}
+
+func (repo *userRepo) UpdatePassword(id string, password string) (*models.User, error) {
+	user := models.User{}
+
+    if err := repo.db.Model(&user).Where("id = ?", id).Update("password", password).Error; err != nil {
+        return nil, err
+    }
+	
+    return &user, nil
+}
+
 func (repo *userRepo) GetUsers() (*models.Users, error) {
 	var data models.Users
 
@@ -67,10 +88,10 @@ func (repo *userRepo) GetUserByEmail(email string) (*models.User, error) {
 	return &user, nil
 }
 
-func (repo *userRepo) UpdateUser(user *models.User) (*models.User, error) {
-	if err := repo.db.Save(user).Error; err != nil {
+func (repo *userRepo) UpdateUser(userData *models.User) (*models.User, error) {
+	if err := repo.db.Save(userData).Error; err != nil {
 		return nil, err
 	}
 
-	return user, nil
+	return userData, nil
 }
