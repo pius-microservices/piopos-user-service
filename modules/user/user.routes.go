@@ -21,6 +21,12 @@ func UserRoutes(router *gin.Engine, controller *userController, prefix string) {
 		userGroup.PUT("/send-otp", func(ctx *gin.Context) {
 			controller.SendNewOTPCode(ctx)
 		})
+		userGroup.PUT("/update", middlewares.AuthMiddleware(), func(ctx *gin.Context) {
+			controller.UpdateUserProfile(ctx)
+		})
+		userGroup.PUT("/update-password", middlewares.AuthMiddleware(), func(ctx *gin.Context) {
+			controller.UpdatePassword(ctx)
+		})
 
 		userGroup.GET("/", func(ctx *gin.Context) {
 			controller.GetUsers(ctx)

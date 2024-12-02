@@ -124,6 +124,50 @@ func (controller *userController) SendNewOTPCode(ctx *gin.Context) {
 	ctx.JSON(status, responseData)
 }
 
+func (controller *userController) UpdateUserProfile(ctx *gin.Context) {
+	ctx.Header("Content-type", "application/json")
+	userID, exists := ctx.Get("id")
+
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+
+	var userData models.User
+
+	err := ctx.ShouldBindJSON(&userData)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to parse request"})
+		return
+	}
+
+	responseData, status := controller.service.UpdateUserProfile(&userData, userID.(string))
+
+	ctx.JSON(status, responseData)
+}
+
+func (controller *userController) UpdatePassword(ctx *gin.Context) {
+	ctx.Header("Content-type", "application/json")
+	userID, exists := ctx.Get("id")
+
+	if !exists {
+		ctx.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized"})
+		return
+	}
+
+	var userData models.User
+
+	err := ctx.ShouldBindJSON(&userData)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to parse request"})
+		return
+	}
+
+	responseData, status := controller.service.UpdatePassword(userID.(string), userData.Password)
+
+	ctx.JSON(status, responseData)
+}
+
 // GetUsers godoc
 // @Summary Get all users
 // @Description Fetch all users
