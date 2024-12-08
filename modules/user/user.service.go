@@ -1,6 +1,8 @@
 package user
 
 import (
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/pius-microservices/piopos-user-service/interfaces"
@@ -39,8 +41,31 @@ func (service *userService) SignUp(userData *models.User) (gin.H, int) {
 		return gin.H{"status": 500, "message": err.Error()}, 500
 	}
 
+	message := utils.EmailData{
+		Text:    "",
+		Name:    strings.Split(userData.Name, " ")[0],
+		Subject: "Account Verification",
+		OTPCode: otpCode,
+	}
+
+	header := "Verify Your Account"
+	text1 := "Hi " + message.Name + ". Thank you for registering!"
+	text2 := "Your OTP code is:"
+	text3 := otpCode
+	footerText := "Please verify your email to activate your account."
+	year := strconv.Itoa(time.Now().Year())
+
+	message.Text = utils.EmailHTML(header, text1, text2, text3, footerText, year)
+
+	err = utils.SendMail(userData, &message)
+	if err != nil {
+		return gin.H{"status": 500, "message": err.Error()}, 500
+	}
+
 	return gin.H{"data": newData}, 201
 }
+
+
 
 func (service *userService) VerifyAccount(email string, otp string) (gin.H, int) {
 	user, err := service.repo.GetUserByEmail(email)
@@ -87,6 +112,27 @@ func (service *userService) SendNewOTPCode(email string) (gin.H, int) {
 	user.OTPExpiration = time.Now().Add(30 * time.Minute)
 
 	_, err = service.repo.UpdateUser(user)
+	if err != nil {
+		return gin.H{"status": 500, "message": err.Error()}, 500
+	}
+
+	message := utils.EmailData{
+		Text:    "",
+		Name:    strings.Split(user.Name, " ")[0],
+		Subject: "Account Verification",
+		OTPCode: otpCode,
+	}
+
+	header := "Verify Your Account"
+	text1 := "Hi " + message.Name + ". We have sent you a new OTP code. If you did not request this, please ignore this email."
+	text2 := "Your OTP code is:"
+	text3 := otpCode
+	footerText := "Please verify your email to activate your account."
+	year := strconv.Itoa(time.Now().Year())
+
+	message.Text = utils.EmailHTML(header, text1, text2, text3, footerText, year)
+
+	err = utils.SendMail(user, &message)
 	if err != nil {
 		return gin.H{"status": 500, "message": err.Error()}, 500
 	}

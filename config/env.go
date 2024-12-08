@@ -14,6 +14,11 @@ type Config struct {
 	Mode      string
 	JwtSecret string
 
+	MailerPort     string
+	MailerHost     string
+	MailerEmail    string
+	MailerPassword string
+
 	UserDBPort     string
 	UserDBUsername string
 	UserDBPassword string
@@ -37,6 +42,11 @@ func LoadConfig() *Config {
 			BaseURL:   os.Getenv("BASE_URL"),
 			JwtSecret: os.Getenv("JWT_ACCESS_TOKEN_SECRET"),
 			Mode:      os.Getenv("MODE"),
+
+			MailerPort:     os.Getenv("PIOPOS_MAILER_PORT"),
+			MailerHost:     os.Getenv("PIOPOS_MAILER_HOST"),
+			MailerEmail:    os.Getenv("PIOPOS_MAILER_EMAIL"),
+			MailerPassword: os.Getenv("PIOPOS_MAILER_PASSWORD"),
 
 			UserDBPort:     os.Getenv("USER_SERVICE_DB_PORT"),
 			UserDBUsername: os.Getenv("USER_SERVICE_DB_USERNAME"),
