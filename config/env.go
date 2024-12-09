@@ -9,10 +9,11 @@ import (
 )
 
 type Config struct {
-	Port      string
-	BaseURL   string
-	Mode      string
-	JwtSecret string
+	Port                  string
+	BaseURL               string
+	Mode                  string
+	JwtSecret             string
+	JwtRefreshTokenSecret string
 
 	MailerPort     string
 	MailerHost     string
@@ -38,10 +39,11 @@ func LoadConfig() *Config {
 		}
 
 		envConfig = &Config{
-			Port:      os.Getenv("APP_PORT"),
-			BaseURL:   os.Getenv("BASE_URL"),
-			JwtSecret: os.Getenv("JWT_ACCESS_TOKEN_SECRET"),
-			Mode:      os.Getenv("MODE"),
+			Port:                  os.Getenv("APP_PORT"),
+			BaseURL:               os.Getenv("BASE_URL"),
+			JwtSecret:             os.Getenv("JWT_ACCESS_TOKEN_SECRET"),
+			JwtRefreshTokenSecret: os.Getenv("JWT_REFRESH_TOKEN_SECRET"),
+			Mode:                  os.Getenv("MODE"),
 
 			MailerPort:     os.Getenv("PIOPOS_MAILER_PORT"),
 			MailerHost:     os.Getenv("PIOPOS_MAILER_HOST"),

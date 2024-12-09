@@ -8,7 +8,6 @@ import (
 )
 
 func UserRoutes(router *gin.Engine, controller *userController, prefix string) {
-	// envCfg := config.LoadConfig()
 
 	userGroup := router.Group(prefix + "/user")
 	{
@@ -26,6 +25,12 @@ func UserRoutes(router *gin.Engine, controller *userController, prefix string) {
 		})
 		userGroup.PUT("/update-password", middlewares.AuthMiddleware(), func(ctx *gin.Context) {
 			controller.UpdatePassword(ctx)
+		})
+		userGroup.POST("/refresh-token", func(ctx *gin.Context) {
+			controller.CreateRefreshToken(ctx)
+		})
+		userGroup.POST("/validate-refresh-token", func(ctx *gin.Context) {
+			controller.ValidateRefreshToken(ctx)
 		})
 
 		userGroup.GET("/", func(ctx *gin.Context) {

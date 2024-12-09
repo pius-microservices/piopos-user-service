@@ -2,6 +2,8 @@ package user
 
 import (
 	"errors"
+	"time"
+
 	"github.com/pius-microservices/piopos-user-service/package/database/models"
 
 	"gorm.io/gorm"
@@ -39,11 +41,30 @@ func (repo *userRepo) UpdateUserProfile(userData *models.User, id string) (*mode
 func (repo *userRepo) UpdatePassword(id string, password string) (*models.User, error) {
 	user := models.User{}
 
-    if err := repo.db.Model(&user).Where("id = ?", id).Update("password", password).Error; err != nil {
-        return nil, err
-    }
-	
-    return &user, nil
+	if err := repo.db.Model(&user).Where("id = ?", id).Update("password", password).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (repo *userRepo) CreateRefreshToken(refreshToken *models.RefreshToken) (*models.RefreshToken, error) {
+
+	if err := repo.db.Create(refreshToken).Error; err != nil {
+		return nil, err
+	}
+
+	return refreshToken, nil
+}
+
+func (repo *userRepo) ValidateRefreshToken(userId string, refreshToken string) (*models.RefreshToken, error) {
+	var token models.RefreshToken
+
+	if result := repo.db.Where("user_id = ? AND token = ? AND expires_at > ?", userId, refreshToken, time.Now()).First(&token); result.Error != nil {
+		return nil, result.Error
+	}
+
+	return &token, nil
 }
 
 func (repo *userRepo) GetUsers() (*models.Users, error) {
