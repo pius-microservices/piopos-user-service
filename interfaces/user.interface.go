@@ -13,6 +13,7 @@ type UserRepo interface {
 	UpdatePassword(id string, password string) (*models.User, error)
 	CreateRefreshToken(refreshToken *models.RefreshToken) (*models.RefreshToken, error)
 	ValidateRefreshToken(userId string, refreshToken string) (*models.RefreshToken, error)
+	DeleteRefreshToken(userId string, refreshToken string) error
 
 	GetUsers() (*models.Users, error)
 	GetUserById(id string) (*models.User, error)
@@ -27,6 +28,7 @@ type UserService interface {
 	UpdatePassword(id string, password string) (gin.H, int)
 	CreateRefreshToken(userId string) (gin.H, int)
 	ValidateRefreshToken(userId string, refreshToken string) (gin.H, int)
+	DeleteRefreshToken(userId string, refreshToken string) (gin.H, int)
 
 	GetUsers() (gin.H, int)
 	GetUserById(id string) (gin.H, int)

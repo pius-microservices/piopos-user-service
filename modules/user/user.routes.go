@@ -1,7 +1,6 @@
 package user
 
 import (
-	// "github.com/pius-microservices/piopos-user-service/config"
 	"github.com/pius-microservices/piopos-user-service/middlewares"
 
 	"github.com/gin-gonic/gin"
@@ -28,6 +27,9 @@ func UserRoutes(router *gin.Engine, controller *userController, prefix string) {
 		})
 		userGroup.POST("/refresh-token", func(ctx *gin.Context) {
 			controller.CreateRefreshToken(ctx)
+		})
+		userGroup.DELETE("/refresh-token", func(ctx *gin.Context) {
+			controller.DeleteRefreshToken(ctx)
 		})
 		userGroup.POST("/validate-refresh-token", func(ctx *gin.Context) {
 			controller.ValidateRefreshToken(ctx)

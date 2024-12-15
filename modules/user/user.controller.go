@@ -189,6 +189,32 @@ func (controller *userController) CreateRefreshToken(ctx *gin.Context) {
 	ctx.JSON(status, responseData)
 }
 
+func (controller *userController) DeleteRefreshToken(ctx *gin.Context) {
+	ctx.Header("content-type", "application/json")
+
+	var token models.RefreshToken
+
+	err := ctx.ShouldBindJSON(&token)
+	if err != nil {
+		ctx.JSON(500, gin.H{"error": "Failed to parse request"})
+		return
+	}
+
+	if token.UserID == "" {
+		ctx.JSON(400, gin.H{"message": "User ID is required"})
+		return
+	}
+
+	if token.Token == "" {
+		ctx.JSON(400, gin.H{"message": "Refresh token is required"})
+		return
+	}
+
+	responseData, status := controller.service.DeleteRefreshToken(token.UserID, token.Token)
+
+	ctx.JSON(status, responseData)
+}
+
 func (controller *userController) ValidateRefreshToken(ctx *gin.Context) {
 	ctx.Header("content-type", "application/json")
 	

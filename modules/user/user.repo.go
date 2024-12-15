@@ -57,6 +57,19 @@ func (repo *userRepo) CreateRefreshToken(refreshToken *models.RefreshToken) (*mo
 	return refreshToken, nil
 }
 
+func (repo *userRepo) DeleteRefreshToken(userId string, refreshToken string) error {
+	result := repo.db.Where("user_id = ? AND token = ?", userId, refreshToken).Delete(&models.RefreshToken{})
+	if result.Error != nil {
+		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return errors.New("refresh token not found")
+	}
+
+	return nil
+}
+
 func (repo *userRepo) ValidateRefreshToken(userId string, refreshToken string) (*models.RefreshToken, error) {
 	var token models.RefreshToken
 
