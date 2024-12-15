@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/pius-microservices/piopos-user-service/interfaces"
+	"github.com/pius-microservices/piopos-user-service/middlewares"
 	"github.com/pius-microservices/piopos-user-service/package/database/models"
 	"github.com/pius-microservices/piopos-user-service/package/utils"
 
@@ -21,6 +22,7 @@ func NewService(repo interfaces.UserRepo) *userService {
 }
 
 func (service *userService) SignUp(userData *models.User) (gin.H, int) {
+	errorLogger, _ := utils.InitLogger()
 	hashedPassword, err := utils.HashPassword(userData.Password)
 	if err != nil {
 		return gin.H{"status": 500, "message": err.Error()}, 500
@@ -57,15 +59,15 @@ func (service *userService) SignUp(userData *models.User) (gin.H, int) {
 
 	message.Text = utils.EmailHTML(header, text1, text2, text3, footerText, year)
 
-	err = utils.SendMail(userData, &message)
-	if err != nil {
-		return gin.H{"status": 500, "message": err.Error()}, 500
-	}
-
+	go func() {
+		err := utils.SendMail(userData, &message)
+		if err != nil {
+			errorLogger.Println("Failed to send OTP email to ", userData.Email, err)
+		}
+	}()
+	
 	return gin.H{"data": newData}, 201
 }
-
-
 
 func (service *userService) VerifyAccount(email string, otp string) (gin.H, int) {
 	user, err := service.repo.GetUserByEmail(email)
@@ -182,6 +184,65 @@ func (service *userService) UpdatePassword(id string, password string) (gin.H, i
 	}
 
 	return gin.H{"status": 200, "message": "Password updated successfully"}, 200
+}
+
+func (service *userService) CreateRefreshToken(userId string) (gin.H, int) {
+
+	user, err := service.repo.GetUserById(userId)
+
+	if err != nil {
+		if err.Error() == "record not found" {
+			return gin.H{"status": 404, "message": "User not found"}, 404
+		}
+		return gin.H{"status": 500, "message": err.Error()}, 500
+	}
+
+	jwt := middlewares.NewToken(user.ID, time.Hour * 168)
+	token, err := jwt.CreateToken()
+
+	if err != nil {
+		return gin.H{"status": 500, "message": err.Error()}, 500
+	}
+
+	expiresAt := time.Now().Add(time.Hour * 168)
+
+	refreshToken := &models.RefreshToken{
+		UserID:    user.ID,
+		Token:     token,
+		ExpiresAt: expiresAt,
+	}
+
+	newRefreshToken, err := service.repo.CreateRefreshToken(refreshToken)
+
+	if err != nil {
+		return gin.H{"status": 500, "message": err.Error()}, 500
+	}
+
+	return gin.H{"status": 201, "message": "Refresh token created successfully", "refresh_token": newRefreshToken.Token}, 201
+}
+
+func (service *userService) DeleteRefreshToken(userId string, refreshToken string) (gin.H, int) {
+	err := service.repo.DeleteRefreshToken(userId, refreshToken)
+	if err != nil {
+		if err.Error() == "refresh token not found" {
+			return gin.H{"status": 404, "message": "Refresh token not found"}, 404
+		}
+		return gin.H{"status": 500, "message": err.Error()}, 500
+	}
+
+	return gin.H{"status": 200, "message": "Refresh token deleted successfully"}, 200
+}
+
+func (service *userService) ValidateRefreshToken(userId string, refreshToken string) (gin.H, int) {
+	token, err := service.repo.ValidateRefreshToken(userId, refreshToken)
+	if err != nil {
+		if err.Error() == "record not found" {
+			return gin.H{"status": 404, "message": "Refresh token not found"}, 404
+		}
+		return gin.H{"status": 500, "message": err.Error()}, 500
+	}
+
+	return gin.H{"status": 200, "message": "Refresh token is valid", "token": token}, 200
 }
 
 func (service *userService) GetUsers() (gin.H, int) {
